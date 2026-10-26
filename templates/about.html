@@ -1,27 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - MoodLens</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body class="bg-light">
+{% extends "base.html" %}
 
-    <nav class="navbar">
-        <a href="/" class="logo" style="text-decoration: none;">😊 MoodLens</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/how-it-works">How It Works</a></li>
-            <li><a href="/emotions">Emotions Spectrum</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+{% block title %}About Us - MoodLens{% endblock %}
+{% block body_class %}bg-light{% endblock %}
 
+{% block content %}
     <main class="app-container">
-        <div class="app-card" style="padding: 50px; text-align: center;">
-            <h1 style="font-size: 2.5rem; color: #1a1a2e; margin-bottom: 20px;">About MoodLens</h1>
+        <div class="app-card app-card-padded">
+            <h1 style="color: #1a1a2e; margin-bottom: 20px;">About MoodLens</h1>
             
             <p style="font-size: 1.1rem; color: #4b5563; line-height: 1.8; max-width: 600px; margin: 0 auto 40px;">
                 <strong>MoodLens</strong> is an innovative <em>Artificial Intelligence</em> (AI)-based project designed to detect and recognize human facial emotions in <em>real-time</em>. The goal of this project is to help users better understand their own emotional spectrum and explore the psychological meaning behind each expression.
@@ -55,6 +40,4 @@
             
         </div>
     </main>
-
-</body>
-</html>
+{% endblock %}

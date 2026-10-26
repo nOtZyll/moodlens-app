@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoodLens - Emotion Detection</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+{% extends "base.html" %}
+
+{% block title %}MoodLens - Emotion Detection{% endblock %}
+
+{% block head %}
     <style>
         .meme-promo {
             background: linear-gradient(135deg, #8A2BE2 0%, #a855f7 100%);
@@ -44,18 +41,9 @@
             transform: rotate(-15deg);
         }
     </style>
-</head>
-<body>
-    <nav class="navbar">
-        <a href="/" class="logo" style="text-decoration: none;">😊 MoodLens</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/how-it-works">How It Works</a></li>
-            <li><a href="/emotions">Emotions Spectrum</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+{% endblock %}
 
+{% block content %}
     <main class="hero-section">
         <div class="hero-text">
             <h1>Know What You're<br>Feeling Right Now.</h1>
@@ -94,7 +82,7 @@
                         </div>
                     </div>
 
-                    <div class="dash-card camera-area" style="background-image: url('https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=500&q=80');">
+                    <div class="dash-card camera-area" style="background-image: url('{{ url_for('static', filename='images/hero-face.jpg') }}');">
                         <div class="cam-icon">🎥</div>
                         <div class="face-scanner"></div>
                     </div>
@@ -108,5 +96,4 @@
             </div>
         </div>
     </main>
-</body>
-</html>
+{% endblock %}

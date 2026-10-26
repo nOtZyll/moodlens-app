@@ -3,21 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoodLens</title>
+    <title>{% block title %}MoodLens{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+    {% set nav_items = [
+        ('/', 'Home'),
+        ('/detect', 'Detect'),
+        ('/how-it-works', 'How It Works'),
+        ('/emotions', 'Emotions Spectrum'),
+        ('/about', 'About'),
+    ] %}
     <nav class="navbar">
-        <div class="logo">😊 MoodLens</div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/detect">Detect</a></li>
-            <li><a href="/emotions">Emotions</a></li>
-            <li><a href="/about">About</a></li>
+        <a href="/" class="logo">😊 MoodLens</a>
+        <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navLinks">☰</button>
+        <ul class="nav-links" id="navLinks">
+            {% for href, label in nav_items %}
+                {% set is_active = request.path == href or (href == '/emotions' and request.path.startswith('/emotion/')) %}
+                <li><a href="{{ href }}"{% if is_active %} class="active" aria-current="page"{% endif %}>{{ label }}</a></li>
+            {% endfor %}
         </ul>
     </nav>
 
     {% block content %}{% endblock %}
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p class="footer-label">Research by</p>
+            <div class="footer-logos">
+                <img src="{{ url_for('static', filename='images/logos/iris.png') }}" alt="IRIS - Innovative Research on Intelligent System" class="footer-logo logo-iris">
+                <span class="footer-divider" aria-hidden="true"></span>
+                <img src="{{ url_for('static', filename='images/logos/ftmm.png') }}" alt="Fakultas Teknologi Maju dan Multidisiplin" class="footer-logo logo-ftmm">
+                <img src="{{ url_for('static', filename='images/logos/unair.png') }}" alt="Universitas Airlangga" class="footer-logo logo-unair">
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            const open = navLinks.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', open);
+        });
+    </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

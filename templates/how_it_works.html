@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How It Works - MoodLens</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+{% extends "base.html" %}
+
+{% block title %}How It Works - MoodLens{% endblock %}
+{% block body_class %}bg-light{% endblock %}
+
+{% block head %}
     <style>
         .step-container {
             display: flex;
@@ -41,23 +39,29 @@
             line-height: 1.6;
             margin: 0;
         }
+
+        @media (max-width: 768px) {
+            .step-container {
+                padding: 18px;
+                margin-bottom: 16px;
+            }
+            .step-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                margin-right: 14px;
+            }
+            .step-content h3 {
+                font-size: 1.1rem;
+            }
+        }
     </style>
-</head>
-<body class="bg-light">
+{% endblock %}
 
-    <nav class="navbar">
-        <a href="/" class="logo">😊 MoodLens</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/how-it-works">How It Works</a></li>
-            <li><a href="/emotions">Emotions Spectrum</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
-
+{% block content %}
     <main class="app-container">
-        <div class="app-card" style="padding: 50px; text-align: center;">
-            <h1 style="font-size: 2.5rem; color: #1a1a2e; margin-bottom: 10px;">How Does It Work?</h1>
+        <div class="app-card app-card-padded">
+            <h1 style="color: #1a1a2e; margin-bottom: 10px;">How Does It Work?</h1>
             <p style="color: #64748b; margin-bottom: 40px;">A simple guide to using MoodLens emotion detection technology.</p>
 
             <div class="step-container">
@@ -72,7 +76,7 @@
                 <div class="step-number">2</div>
                 <div class="step-content">
                     <h3>Real-Time AI Analysis</h3>
-                    <p>Once the camera is on, point your face toward the screen. Automatically, our <em>Artificial Intelligence</em> (AI) system will capture snapshots of your face every few seconds and process them using a <em>Deep Learning</em> (DeepFace) model to guess your emotion.</p>
+                    <p>Once the camera is on, point your face toward the screen. Automatically, our <em>Artificial Intelligence</em> (AI) system will capture a snapshot of your face every couple of seconds and process it using our custom <strong>EfficientNet</strong> <em>Deep Learning</em> model, trained on the FER-2013 dataset, to recognize your emotion.</p>
                 </div>
             </div>
 
@@ -98,6 +102,4 @@
 
         </div>
     </main>
-
-</body>
-</html>
+{% endblock %}

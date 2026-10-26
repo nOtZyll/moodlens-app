@@ -1,24 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ emotion.title }} - MoodLens</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body class="bg-light">
+{% extends "base.html" %}
 
-    <nav class="navbar">
-        <a href="/" class="logo" style="text-decoration: none;">😊 MoodLens</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/how-it-works">How It Works</a></li>
-            <li><a href="/emotions">Emotions Spectrum</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+{% block title %}{{ emotion.title }} - MoodLens{% endblock %}
+{% block body_class %}bg-light{% endblock %}
 
+{% block content %}
     <main class="app-container">
         <div class="app-card">
             
@@ -94,5 +79,4 @@
             
         </div>
     </main>
-</body>
-</html>
+{% endblock %}

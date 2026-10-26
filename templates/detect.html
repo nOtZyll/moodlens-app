@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detect Emotion - MoodLens</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+{% extends "base.html" %}
+
+{% block title %}Detect Emotion - MoodLens{% endblock %}
+{% block body_class %}bg-light{% endblock %}
+
+{% block head %}
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -17,28 +15,47 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            padding: 40px;
             text-align: center;
         }
-        
+
+        .app-card.detect-card {
+            max-width: 1180px;
+        }
+
+        .live-section {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+            gap: 28px;
+            align-items: start;
+            width: 100%;
+            margin-top: 24px;
+        }
+
+        .camera-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .video-wrapper {
             position: relative;
             width: 100%;
-            max-width: 640px;
-            margin: 20px 0;
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             background-color: #1a1a2e;
-            line-height: 0; 
+            line-height: 0;
         }
         #videoElement {
             width: 100%;
             height: auto;
+            /* Keeps a 4:3 frame before the camera starts, then follows the camera's own ratio */
+            aspect-ratio: auto 4 / 3;
             transform: scaleX(-1);
             display: block;
         }
-        
+
         #overlayCanvas {
             position: absolute;
             top: 0;
@@ -50,12 +67,106 @@
             z-index: 10;
         }
 
+        .camera-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            color: #94a3b8;
+            font-weight: 700;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .camera-placeholder span {
+            font-size: 2.6rem;
+        }
+        .video-wrapper.live .camera-placeholder {
+            display: none;
+        }
+
+        /* An uploaded photo replaces the video; it's letterboxed into the same 4:3 frame */
+        .photo-canvas {
+            display: none;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: contain;
+        }
+        .video-wrapper.photo-mode .photo-canvas {
+            display: block;
+        }
+        .video-wrapper.photo-mode #videoElement,
+        .video-wrapper.photo-mode #overlayCanvas,
+        .video-wrapper.photo-mode .camera-placeholder {
+            display: none;
+        }
+
+        .countdown {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(5rem, 16vw, 10rem);
+            font-weight: 800;
+            line-height: 1;
+            color: #ffffff;
+            text-shadow: 0 6px 30px rgba(0, 0, 0, 0.45);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+        }
+        .countdown.show {
+            animation: countdown-pop 1s ease-out forwards;
+        }
+        @keyframes countdown-pop {
+            0% { opacity: 0; transform: scale(1.6); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.85); }
+        }
+
+        .camera-flash {
+            position: absolute;
+            inset: 0;
+            background: #ffffff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 30;
+        }
+        .camera-flash.flash {
+            animation: camera-flash 0.5s ease-out;
+        }
+        @keyframes camera-flash {
+            0% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .countdown.show {
+                animation: none;
+                opacity: 1;
+            }
+            .camera-flash.flash {
+                animation: none;
+            }
+        }
+
         .controls {
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
-            margin-bottom: 30px;
-            margin-top: 10px;
+            margin-top: 20px;
             justify-content: center;
+        }
+        .privacy-note {
+            margin-top: 16px;
+            max-width: 460px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            line-height: 1.5;
         }
         .btn {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -72,81 +183,86 @@
         .btn:hover {
             transform: translateY(-2px);
         }
-        .btn-start { 
-            background: linear-gradient(135deg, #4CAF50 0%, #2E8B57 100%); 
-            color: white; 
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E8B57 100%);
+            color: white;
         }
-        .btn-stop { 
-            background: linear-gradient(135deg, #EF6A6A 0%, #E04D4D 100%); 
-            color: white; 
-            display: none; 
+        .btn-upload {
+            background: #eef0fb;
+            color: #3f4aa8;
         }
-        .btn-meme { 
-            background: linear-gradient(135deg, #B291FF 0%, #8E6BF7 100%); 
-            color: white; 
-            display: none; 
+        .btn-stop {
+            background: linear-gradient(135deg, #EF6A6A 0%, #E04D4D 100%);
+            color: white;
+            display: none;
+        }
+        .btn-meme {
+            background: linear-gradient(135deg, #B291FF 0%, #8E6BF7 100%);
+            color: white;
+            display: none;
         }
 
         .result-box {
             background: #ffffff;
-            padding: 35px 40px;
+            padding: 28px;
             border-radius: 24px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            display: none; 
+            border: 1px solid #eef0f4;
             width: 100%;
-            max-width: 640px;
-            margin-bottom: 20px;
             box-sizing: border-box;
+            text-align: left;
         }
         .result-title {
-            margin: 0; 
-            color: #6c757d; 
-            font-size: 0.95rem; 
-            font-weight: 700; 
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         .emotion-text {
-            font-size: 3.2rem;
+            font-size: 2.8rem;
             font-weight: 800;
             color: #538DD3;
             text-transform: uppercase;
-            margin: 5px 0 25px 0;
+            margin: 5px 0 22px 0;
+            line-height: 1.15;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         #probContainer {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #probContainer:empty::before {
+            content: "Start your camera to see the breakdown of all 7 emotions here.";
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
         .prob-item {
             background: #f8fafc;
-            padding: 18px 20px;
-            border-radius: 16px;
+            padding: 12px 14px;
+            border-radius: 14px;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 0;
-            position: relative;
+            align-items: center;
+            gap: 14px;
         }
         .emotion-label {
-            width: auto;
-            font-size: 14px;
+            flex: 0 0 78px;
+            font-size: 13px;
             font-weight: 800;
             color: #1a1a2e;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .bar-wrapper {
-            width: 100%;
+            flex: 1;
             background: #e9ecef;
             height: 10px;
             border-radius: 10px;
             overflow: hidden;
-            flex-grow: 0;
         }
         .bar-fill {
             height: 100%;
@@ -154,13 +270,10 @@
             transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .percent-box {
-            position: absolute;
-            top: 12px;
-            right: 15px;
-            width: auto;
+            flex: 0 0 64px;
             background: #ffffff;
             color: #1a1a2e;
-            padding: 5px 12px;
+            padding: 5px 8px;
             border-radius: 10px;
             font-size: 13px;
             font-weight: 800;
@@ -170,90 +283,257 @@
         }
 
         #memeArea {
-            display: none; 
-            margin-top: 10px; 
+            display: none;
+            margin-top: 24px;
             background: #ffffff;
             border: 2px dashed #B291FF;
-            border-radius: 24px; 
-            padding: 30px; 
+            border-radius: 24px;
+            padding: 30px;
             width: 100%;
-            max-width: 640px;
+            max-width: 720px;
             box-sizing: border-box;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            scroll-margin-top: 24px;
         }
         .meme-title {
-            color: #1a1a2e; 
-            font-size: 1.1rem; 
+            color: #1a1a2e;
+            font-size: 1.1rem;
             font-weight: 800;
             margin-top: 0;
             margin-bottom: 15px;
             text-transform: uppercase;
         }
+        #memeEmotion {
+            color: #8E6BF7;
+        }
+        /* Every meme is shown in the same 4:3 frame, letterboxed and capped so the whole card
+           (title, meme and buttons) fits on screen. The saved image keeps the full photo. */
         #memeCanvas {
-            width: 100%; 
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4 / 3;
+            max-height: calc(100vh - 230px);
+            object-fit: contain;
+            background: #1a1a2e;
             border-radius: 16px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        #btnDownloadMeme {
-            background: linear-gradient(135deg, #FF758C 0%, #FF7EB3 100%);
-            color: white; 
-            margin-top: 20px; 
-            width: 100%;
+        .meme-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .meme-actions .btn {
+            flex: 1;
             font-size: 1rem;
             padding: 15px;
+        }
+        #btnDownloadMeme {
+            background: linear-gradient(135deg, #FF758C 0%, #FF7EB3 100%);
+            color: white;
         }
         #btnDownloadMeme:hover {
             box-shadow: 0 8px 20px rgba(255, 117, 140, 0.3);
         }
+        #btnRetake,
+        .btn-light {
+            background: #f1f5f9;
+            color: #1a1a2e;
+        }
+        #btnShare,
+        .btn-share {
+            background: linear-gradient(135deg, #6f7fd6 0%, #4a58b8 100%);
+            color: white;
+        }
+
+        .share-dialog {
+            border: none;
+            border-radius: 24px;
+            padding: 32px;
+            width: min(420px, calc(100vw - 32px));
+            text-align: center;
+            color: #1a1a2e;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+        .share-dialog::backdrop {
+            background: rgba(15, 23, 42, 0.55);
+        }
+        .share-dialog h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .share-dialog p {
+            color: #4b5563;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .share-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .share-actions .btn {
+            flex: 1;
+            padding: 13px 16px;
+        }
+        #shareQr {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            margin: 4px auto 14px;
+            image-rendering: pixelated;
+        }
+        .share-spinner {
+            width: 44px;
+            height: 44px;
+            margin: 18px auto 16px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #5c6bc0;
+            border-radius: 50%;
+            animation: share-spin 0.9s linear infinite;
+        }
+        @keyframes share-spin {
+            to { transform: rotate(360deg); }
+        }
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
+        .emotion-text.is-status {
+            font-size: 1.6rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 900px) {
+            .live-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detect-container {
+                padding: 28px 16px;
+            }
+            .detect-container h2 {
+                font-size: 1.4rem;
+            }
+            .video-wrapper {
+                border-radius: 16px;
+            }
+            .btn {
+                padding: 12px 22px;
+            }
+            .result-box {
+                padding: 22px 18px;
+            }
+            .emotion-text {
+                font-size: 2.2rem;
+            }
+            .emotion-text.is-status {
+                font-size: 1.4rem;
+            }
+            #memeArea {
+                padding: 18px;
+            }
+            .meme-actions {
+                flex-direction: column;
+            }
+        }
     </style>
-</head>
-<body class="bg-light">
+{% endblock %}
 
-    <nav class="navbar">
-        <a href="/" class="logo" style="text-decoration: none;">😊 MoodLens</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/how-it-works">How It Works</a></li>
-            <li><a href="/emotions">Emotions Spectrum</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
-
+{% block content %}
     <main class="app-container">
-        <div class="app-card detect-container">
+        <div class="app-card detect-card detect-container">
             <h2>Live Emotion Analytics Fusion</h2>
             <p>Turn on your camera and let MoodLens read your expression and make a meme!</p>
             <p style="color: #6c757d; font-size: 0.9rem;">Make sure your camera is enabled and you are in a well-lit area for best results.</p>
 
-            <div class="video-wrapper">
-                <video id="videoElement" autoplay playsinline></video>
-                <canvas id="overlayCanvas"></canvas> 
-                <canvas id="canvasElement" style="display:none;"></canvas>
-            </div>
+            <div id="liveSection" class="live-section">
+                <div class="camera-column">
+                    <div id="videoWrapper" class="video-wrapper">
+                        <video id="videoElement" autoplay playsinline></video>
+                        <canvas id="overlayCanvas"></canvas>
+                        <canvas id="canvasElement" style="display:none;"></canvas>
+                        <canvas id="photoCanvas" class="photo-canvas"></canvas>
+                        <div class="camera-placeholder"><span>📷</span>Start the camera or upload a photo</div>
+                        <div id="countdown" class="countdown" aria-live="assertive"></div>
+                        <div id="cameraFlash" class="camera-flash"></div>
+                    </div>
 
-            <div class="controls">
-                <button id="btnStart" class="btn btn-start">Start Camera</button>
-                <button id="btnStop" class="btn btn-stop">Stop Camera</button>
-                <button id="btnMeme" class="btn btn-meme">Make Me a Meme!</button>
-            </div>
+                    <div class="controls">
+                        <button id="btnStart" class="btn btn-start">Start Camera</button>
+                        <button id="btnUpload" class="btn btn-upload">Upload Photo</button>
+                        <input type="file" id="photoInput" accept="image/*" hidden>
+                        <button id="btnStop" class="btn btn-stop">Stop Camera</button>
+                        <button id="btnMeme" class="btn btn-meme">Make Me a Meme!</button>
+                    </div>
 
-            <div id="resultBox" class="result-box">
-                <p class="result-title">DETECTED EMOTION:</p>
-                <p id="emotionResult" class="emotion-text">WAITING...</p>
-                
-                <div id="probContainer"></div>
+                    <p class="privacy-note">🔒 Your camera feed and photos are analyzed on this computer and never saved. A meme is only stored if you choose “Send to Phone”, and it is deleted automatically after 7 days.</p>
+                </div>
+
+                <div id="resultBox" class="result-box">
+                    <p class="result-title">DETECTED EMOTION:</p>
+                    <p id="emotionResult" class="emotion-text is-status">CAMERA OFF</p>
+
+                    <div id="probContainer"></div>
+                </div>
             </div>
 
             <div id="memeArea">
-                <h3 class="meme-title">GENERATED MEME:</h3>
+                <h3 class="meme-title">GENERATED MEME: <span id="memeEmotion"></span></h3>
                 <canvas id="memeCanvas"></canvas>
-                <button id="btnDownloadMeme" class="btn">
-                     Save Meme to Device
-                </button>
+                <div class="meme-actions">
+                    <button id="btnDownloadMeme" class="btn">Save to Device</button>
+                    {% if share_enabled %}
+                    <button id="btnShare" class="btn">Send to Phone</button>
+                    {% endif %}
+                    <button id="btnRetake" class="btn">Take Another</button>
+                </div>
             </div>
         </div>
     </main>
 
+    {% if share_enabled %}
+    <dialog id="shareDialog" class="share-dialog" aria-labelledby="shareTitle">
+        <h3 id="shareTitle">Send this meme to your phone</h3>
+
+        <div id="shareConsent" class="share-step">
+            <p>Your meme will be stored on the MoodLens exhibition Google Drive so you can open it with a QR code. It is <strong>deleted automatically after 7 days</strong>. Only people with the link can see it.</p>
+            <div class="share-actions">
+                <button id="btnShareConfirm" class="btn btn-share">Create QR Code</button>
+                <button class="btn btn-light" data-share-close>Cancel</button>
+            </div>
+        </div>
+
+        <div id="shareLoading" class="share-step" hidden>
+            <div class="share-spinner" aria-hidden="true"></div>
+            <p>Preparing your QR code…</p>
+        </div>
+
+        <div id="shareResult" class="share-step" hidden>
+            <img id="shareQr" alt="QR code that opens your meme">
+            <p>Scan with your phone camera, then tap download to save it. Available for 7 days.</p>
+            <div class="share-actions">
+                <button class="btn btn-share" data-share-close>Done</button>
+            </div>
+        </div>
+
+        <div id="shareError" class="share-step" hidden>
+            <p>Couldn't create the QR code. Please check the internet connection and try again, or use <strong>Save to Device</strong>.</p>
+            <div class="share-actions">
+                <button id="btnShareRetry" class="btn btn-share">Try Again</button>
+                <button class="btn btn-light" data-share-close>Close</button>
+            </div>
+        </div>
+    </dialog>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
-</body>
-</html>
+{% endblock %}

@@ -1,6 +1,20 @@
+# Tested with Python 3.11
 Flask==3.0.0
-opencv-python-headless
-numpy
-Pillow
-tensorflow
-gunicorn
+numpy==2.4.6
+Pillow==13.0.0
+gunicorn==26.2.0
+
+# "Send to Phone": reads the Drive upload settings from .env and draws the QR code
+python-dotenv==1.1.1
+qrcode==8.2
+
+# OpenCV 5 removed cv2.CascadeClassifier, which app.py uses for face detection
+opencv-python-headless==4.14.0.94
+
+# app.py sets TF_USE_LEGACY_KERAS=1, so tf_keras must match the tensorflow version
+tensorflow==2.21.0
+tf_keras==2.21.0
+efficientnet==1.1.1
+
+# Only needed by cek_label.py to read LabelEncoder.pck
+scikit-learn==1.9.1

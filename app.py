@@ -1,10 +1,20 @@
 import os
+import sys
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
+# Windows consoles default to a legacy codepage that can't print the emoji in the log messages
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from flask import Flask, render_template, request, jsonify
 import cv2
 import numpy as np
 import base64
+import io
+import json
+import urllib.request
+import qrcode
+from dotenv import load_dotenv
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, DepthwiseConv2D
@@ -12,6 +22,14 @@ import efficientnet.tfkeras as efn
 
 app = Flask(__name__)
 EMOTIONS_LIST = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+
+# "Send to Phone" uploads memes to Google Drive through an Apps Script web app (see README).
+# Without both settings in .env the feature stays hidden.
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+DRIVE_UPLOAD_URL = os.environ.get('DRIVE_UPLOAD_URL', '').strip()
+DRIVE_UPLOAD_TOKEN = os.environ.get('DRIVE_UPLOAD_TOKEN', '').strip()
+SHARE_ENABLED = bool(DRIVE_UPLOAD_URL and DRIVE_UPLOAD_TOKEN)
+MAX_SHARE_BYTES = 5 * 1024 * 1024
 
 print("Loading Custom EfficientNet Model...")
 MODEL_PATH = 'FacialExpressionModel.h5'
@@ -48,7 +66,7 @@ def home():
 
 @app.route('/detect')
 def detect():
-    return render_template('detect.html')
+    return render_template('detect.html', share_enabled=SHARE_ENABLED)
 
 @app.route('/emotions')
 def emotions():
@@ -209,6 +227,42 @@ def analyze_frame():
     except Exception as e:
         print(f"\nError AI: {e}")
         return jsonify({'emotion': 'ERROR', 'box': None, 'probabilities': {}})
+
+@app.route('/share_meme', methods=['POST'])
+def share_meme():
+    if not SHARE_ENABLED:
+        return jsonify({'error': 'not_configured'}), 503
+
+    data = request.get_json(silent=True) or {}
+    image_data = data.get('image', '')
+    if not image_data.startswith('data:image/jpeg;base64,'):
+        return jsonify({'error': 'invalid_image'}), 400
+    encoded = image_data.split(',', 1)[1]
+    if len(encoded) * 3 // 4 > MAX_SHARE_BYTES:
+        return jsonify({'error': 'too_large'}), 413
+
+    payload = json.dumps({'token': DRIVE_UPLOAD_TOKEN, 'image': encoded}).encode()
+    upload = urllib.request.Request(DRIVE_UPLOAD_URL, data=payload, headers={'Content-Type': 'application/json'})
+    try:
+        # Apps Script answers the POST with a redirect to the result, which urllib follows as a GET
+        with urllib.request.urlopen(upload, timeout=30) as response:
+            result = json.load(response)
+    except (OSError, ValueError) as e:
+        print(f"\nShare upload failed: {e}")
+        return jsonify({'error': 'upload_failed'}), 502
+
+    url = result.get('url', '')
+    if not result.get('ok') or not url.startswith('https://drive.google.com/'):
+        print(f"\nShare upload rejected: {result.get('error')}")
+        return jsonify({'error': 'upload_failed'}), 502
+
+    return jsonify({'url': url, 'qr': qr_data_url(url)})
+
+def qr_data_url(text):
+    image = qrcode.make(text, box_size=10, border=2)
+    buffer = io.BytesIO()
+    image.save(buffer, format='PNG')
+    return 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode()
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,23 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotions Spectrum - MoodLens</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar">
-        <a href="/" class="logo" style="text-decoration: none;">😊 MoodLens</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/how-it-works">How It Works</a></li>
-            <li><a href="/emotions">Emotions Spectrum</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}Emotions Spectrum - MoodLens{% endblock %}
+
+{% block content %}
     <main class="emotions-container">
         <h1 class="text-center">YOUR EMOTIONS' SPECTRUM</h1>
         
@@ -62,7 +47,9 @@
             </a>
         </div>
     </main>
+{% endblock %}
 
+{% block scripts %}
     <script>
         const cards = document.querySelectorAll('.emo-card');
         const filters = document.querySelectorAll('.filter');
@@ -75,7 +62,8 @@
             cards.forEach((card, index) => {
                 const offset = index - currentIndex;
                 
-                const translateX = offset * 140; 
+                // Half a card width per step (140px on desktop), so it also fits smaller cards on mobile
+                const translateX = offset * card.offsetWidth * 0.5;
                 const rotate = offset * 12;      
                 const scale = 1 - Math.abs(offset) * 0.15; 
                 const zIndex = 10 - Math.abs(offset);
@@ -134,8 +122,9 @@
             });
         });
 
+        window.addEventListener('resize', updateCarousel);
+
         updateCarousel();
         startAutoSlide();
     </script>
-</body>
-</html>
+{% endblock %}

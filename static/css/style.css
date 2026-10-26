@@ -1,3 +1,36 @@
+/* Plus Jakarta Sans is bundled locally so the site works without internet */
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-latin-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-latin-600.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-latin-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-latin-800.woff2') format('woff2');
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -653,4 +686,220 @@ body {
 .emo-item span {
     font-weight: 400;
     color: #6b7280;
+}
+
+.nav-links a.active {
+    color: #5c6bc0;
+}
+
+.nav-toggle {
+    display: none;
+    background: white;
+    border: none;
+    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+    color: #2b3467;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.app-card-padded {
+    padding: 50px;
+    text-align: center;
+}
+
+.site-footer {
+    padding: 1rem 5% 3rem;
+}
+
+.footer-inner {
+    border-top: 1px solid rgba(43, 52, 103, 0.12);
+    padding-top: 2rem;
+}
+
+.footer-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 1.25rem;
+}
+
+.footer-logos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-logo {
+    display: block;
+    width: auto;
+    height: 60px;
+}
+
+.footer-logo.logo-ftmm {
+    height: 42px;
+}
+
+.footer-divider {
+    width: 1px;
+    height: 52px;
+    background: rgba(43, 52, 103, 0.18);
+}
+
+.app-card-padded h1 {
+    font-size: 2.5rem;
+}
+
+@media (max-width: 960px) {
+    .hero-section {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 3rem 5%;
+    }
+
+    .hero-image-mockup {
+        justify-content: center;
+    }
+
+    .hero-text h1 {
+        font-size: 3.2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;
+        padding: 1.25rem 16px;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        gap: 0;
+        width: 100%;
+        margin-top: 1rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-links.open {
+        display: flex;
+    }
+
+    .nav-links a {
+        display: block;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+    }
+
+    .nav-links a.active {
+        background: #eef0fb;
+    }
+
+    .hero-section {
+        padding: 2rem 16px 3rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-text p {
+        font-size: 1rem;
+    }
+
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-grid > .dash-card {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .app-container {
+        padding: 1rem 16px 2rem;
+    }
+
+    .app-card-padded {
+        padding: 32px 20px;
+    }
+
+    .app-card-padded h1 {
+        font-size: 1.9rem;
+    }
+
+    .app-hero {
+        height: 360px;
+    }
+
+    .hero-gradient {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .explore-section {
+        padding: 1.5rem;
+    }
+
+    .emotions-container {
+        padding: 2rem 16px;
+    }
+
+    .text-center {
+        font-size: 1.8rem;
+    }
+
+    .emotion-filters {
+        border-radius: 20px;
+        gap: 0.3rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .filter {
+        padding: 0.5rem 1rem;
+    }
+
+    .carousel-container {
+        height: 380px;
+    }
+
+    .emo-card {
+        width: 210px;
+        height: 300px;
+    }
+
+    .site-footer {
+        padding: 0.5rem 16px 2.5rem;
+    }
+
+    .footer-logos {
+        gap: 1.25rem;
+    }
+
+    .footer-logo {
+        height: 46px;
+    }
+
+    .footer-logo.logo-ftmm {
+        height: 32px;
+    }
+
+    .footer-divider {
+        height: 40px;
+    }
 }
