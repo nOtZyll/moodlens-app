@@ -44,6 +44,7 @@ const memeLogos = MEME_LOGO_SOURCES.map(src => {
 let videoStream = null;
 let detectionInterval = null;
 let requestInFlight = false;
+let clientId = null;
 
 // Bumped whenever the meme flow is reset, so a countdown that is still running knows to stop
 let memeAttempt = 0;
@@ -70,6 +71,8 @@ async function startCamera() {
         exitPhotoMode();
         videoWrapper.classList.add('live');
         lastActivity = Date.now();
+        // ID baru tiap kamera dinyalakan, supaya riwayat smoothing mulai dari awal
+        clientId = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
         btnStart.style.display = 'none';
         btnStop.style.display = 'block';
@@ -80,7 +83,7 @@ async function startCamera() {
 
     } catch (err) {
         console.error("Error accessing webcam:", err);
-        alert("Gagal mengakses kamera. Pastikan browser diizinkan menggunakan kamera.");
+        alert("Gagal mengakses kamera. Pastikan browser diizinkan menggunakan kamera.\n\n" + err.name + ": " + err.message);
     }
 }
 
@@ -157,13 +160,15 @@ function encodeFrame(source, width, height) {
     return { image: canvas.toDataURL('image/jpeg', 0.85), scale };
 }
 
-async function analyzeFrame(image) {
+// Only the live camera loop passes clientId, so its results are smoothed over recent frames.
+// Meme snapshots and uploaded photos leave it out and get the result for that exact image.
+async function analyzeFrame(image, clientId = null) {
     const response = await fetch('/analyze_frame', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ image })
+        body: JSON.stringify({ image, client_id: clientId })
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
@@ -176,7 +181,7 @@ function captureAndSendFrame() {
     const { image, scale } = encodeFrame(video, video.videoWidth, video.videoHeight);
 
     requestInFlight = true;
-    analyzeFrame(image)
+    analyzeFrame(image, clientId)
     .then(data => {
         // The camera may have been stopped while this request was in flight
         if (!videoStream) return;
@@ -694,6 +699,8 @@ if (shareDialog) {
     });
     // Clicking the dimmed backdrop (outside the dialog box) closes it too
     shareDialog.addEventListener('click', event => {
+        // A click on a button also bubbles here, and by then the dialog may have shrunk under the cursor
+        if (event.target !== shareDialog) return;
         const box = shareDialog.getBoundingClientRect();
         const outside = event.clientX < box.left || event.clientX > box.right ||
                         event.clientY < box.top || event.clientY > box.bottom;

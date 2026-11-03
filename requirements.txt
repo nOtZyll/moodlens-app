@@ -8,13 +8,11 @@ gunicorn==26.2.0
 python-dotenv==1.1.1
 qrcode==8.2
 
-# OpenCV 5 removed cv2.CascadeClassifier, which app.py uses for face detection
+# Face detection uses cv2.FaceDetectorYN (YuNet), which needs OpenCV 4.8 or newer
 opencv-python-headless==4.14.0.94
 
-# app.py sets TF_USE_LEGACY_KERAS=1, so tf_keras must match the tensorflow version
-tensorflow==2.21.0
-tf_keras==2.21.0
-efficientnet==1.1.1
+# Runs the HSEmotion models in models/
+onnxruntime==1.31.1
 
 # Only needed by cek_label.py to read LabelEncoder.pck
 scikit-learn==1.9.1

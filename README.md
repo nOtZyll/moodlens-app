@@ -1,3 +1,13 @@
+---
+title: Moodlens App
+emoji: ⚡
+colorFrom: indigo
+colorTo: gray
+sdk: docker
+pinned: false
+license: mit
+---
+
 MoodLens adalah aplikasi web berbasis Artificial Intelligence (AI) yang dirancang untuk mendeteksi dan mengenali ekspresi wajah serta emosi manusia secara otomatis. Aplikasi ini menggabungkan kekuatan Computer Vision dan Web Development untuk memberikan pengalaman interaktif kepada pengguna.
 
 Teknologi yang Digunakan
