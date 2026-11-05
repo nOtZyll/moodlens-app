@@ -103,7 +103,7 @@ Tujuh emosi yang dikenali: senang (happy), sedih (sad), marah (angry), takut (fe
 
 Model HSEmotion adalah model open-source dari proyek *High-Speed face Emotion recognition*. Tim MoodLens memakainya sebagai pengekstrak fitur, lalu melatih sendiri lapisan classifier di atasnya.
 
-**Riwayat model:** versi awal MoodLens memakai model EfficientNet buatan sendiri yang dilatih dengan dataset **FER-2013** (`FacialExpressionModel.h5`, berbasis Keras/TensorFlow). Model itu sudah diganti, dan file-nya hanya disimpan sebagai arsip. Halaman About dan How It Works di website mungkin masih menyebut FER-2013.
+**Riwayat model:** versi awal MoodLens memakai model EfficientNet buatan sendiri yang dilatih dengan dataset **FER-2013** (`FacialExpressionModel.h5`, berbasis Keras/TensorFlow). Model itu sudah diganti, dan file-nya hanya disimpan sebagai arsip.
 
 ## Akurasi dan keterbatasan
 

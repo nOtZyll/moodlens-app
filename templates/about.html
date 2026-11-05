@@ -18,7 +18,7 @@
             
             <div style="background: #f1f5f9; padding: 25px; border-radius: 12px; max-width: 650px; margin: 0 auto 40px; text-align: left; border-left: 5px solid #5c6bc0;">
                 <p style="font-size: 1rem; color: #334155; line-height: 1.7; margin: 0;">
-                    MoodLens is powered by a custom <strong>EfficientNet</strong> architecture. We specifically trained our model using the <strong>FER-2013 dataset</strong> to accurately classify 7 core emotions: Happy, Sad, Angry, Fear, Disgust, Surprise, and Neutral in real-time.
+                    MoodLens first finds your face with the <strong>YuNet</strong> face detector. Two <strong>HSEmotion EfficientNet-B2</strong> models, trained on the <strong>AffectNet</strong> dataset, then turn the face into a set of expression features. On top of them sits our own classifier, retrained on <strong>RAF-DB</strong> and AffectNet, which recognizes 7 core emotions: Happy, Sad, Angry, Fear, Disgust, Surprise, and Neutral. It reaches <strong>85.8% accuracy</strong> on the RAF-DB test set, and all of it runs on this computer.
                 </p>
             </div>
 
